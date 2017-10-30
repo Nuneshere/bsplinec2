@@ -1,0 +1,132 @@
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+
+// INICIALIZANDO VARIAVEIS-----------------
+
+var points = [];
+var move = false;
+var index = -1;
+var qntPontos = 0;
+var precisao = 100, parametro = 1 / precisao;
+
+// CASTEJAU
+
+function makingCurve() {
+        var grau = qntPontos-1;
+        var pontoDaCurva[];
+    
+        while (parametro < 1) {
+            var pontosCasteljau=[];
+            pontosCasteljau = points.slice(0,qntPontos + 1);
+
+            for (var n = 0 ; qntPontos-1 !== 0 ; n++){
+
+            }
+        parametro = parametro + 1 / precisao;
+      }
+};
+
+
+// FUNCOES BASICAS DE CANVAS-----------------
+function clearCanvas()
+{
+    var canvas = document.getElementById('canvas'),
+        ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    points.splice(0,points.length);
+    drawCircles();
+}
+
+function resizeCanvas() {
+	canvas.width = parseFloat(window.getComputedStyle(canvas).width);
+	canvas.height = parseFloat(window.getComputedStyle(canvas).height);
+}
+
+function drawCircles() {
+    qntPontos = qntPontos + 1 ; 
+	for (var i in points) {
+		ctx.beginPath();
+		ctx.arc(points[i].x, points[i].y, 6, 0, 2 * Math.PI);
+		ctx.fillStyle = '#64B5F6';
+		ctx.fill();
+	
+	
+		if(i>0){
+			var posX= points[i-1].x;
+			var posY= points[i-1].y;
+
+			ctx.moveTo(posX,posY);
+			ctx.lineTo(points[i].x,points[i].y)
+            ;
+            ctx.strokeStyle= '#64B5F6';
+            ctx.lineWidth=3;
+			ctx.stroke();
+		}
+	}
+}
+
+function dist(p1, p2) {
+	var v = {x: p1.x - p2.x, y: p1.y - p2.y};
+	return Math.sqrt(v.x * v.x + v.y * v.y);
+}
+
+function getIndex(click) {
+	for (var i in points) {
+		if (dist(points[i], click) <= 10) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+
+
+resizeCanvas();
+
+
+
+// ACOES NO MOUSE-----------------
+
+
+canvas.addEventListener('mousedown', e => {
+	var click = {x: e.offsetX, y: e.offsetY, v:{x: 0, y:0}};
+	index = getIndex(click);
+	if (index === -1) {
+		points.push(click);
+		drawCircles();
+	} else {
+		move = true;
+	}
+});
+
+
+canvas.addEventListener('mouseup', e => {
+	move = false;
+});
+
+canvas.addEventListener('dblclick', e => {
+	if (index !== -1) {
+		points.splice(index, 1);
+	}
+});
+
+
+canvas.addEventListener('mousemove', e => {
+	if (move) {
+		var old = points[index];
+		points[index] = {x: e.offsetX, y: e.offsetY, v: {x: 0, y: 0}};
+		points[index].v = {x: e.offsetX - old.x, y: e.offsetY - old.y};
+		drawCircles();
+	}
+});
+
+setInterval(() => {
+	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	drawCircles();
+	
+	
+}, 500 / 30);
+
+
