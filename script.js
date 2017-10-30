@@ -13,21 +13,23 @@ var precisao = 1000, parametro = 1 / precisao;
 // CASTEJAU
 
 
-
 function makeCurva(){
     var pointsCurve = [];
     for (t = 0 ; t <= 1 ; t = t + parametro){
         var pontosCastel = points.slice(0, qntPontos+1);
-        for(n = 1; n < qntPontos ; n++) {
-          for(p = 0; p < qntPontos - n; p++) {
-            var cordX = (1 - t) * pontosCastel[p].x + t * pontosCastel[p+1].x;
-            var cordY = (1 - t) * pontosCastel[p].y + t * pontosCastel[p+1].y;
-            pontosCastel[p] = {x: cordX, y: cordY};
-          }
-        }
+        deCasterjao(pontosCastel)
         pointsCurve.push(pontosCastel[0]);
-    }
+    }   
     drawCurve(pointsCurve);
+}
+function deCasterjao(pontosCastel){   
+    for(n = 1; n < qntPontos ; n++) {
+      for(p = 0; p < qntPontos - n; p++) {
+        var cordX = (1 - t) * pontosCastel[p].x + t * pontosCastel[p+1].x;
+        var cordY = (1 - t) * pontosCastel[p].y + t * pontosCastel[p+1].y;
+        pontosCastel[p] = {x: cordX, y: cordY};
+      }
+    }
 }
 
 function drawCurve(pointsCurve) {
@@ -40,8 +42,8 @@ function drawCurve(pointsCurve) {
         var yAtual = pointsCurve[i-1].y;
         ctx.moveTo(xAtual, yAtual);
         ctx.lineTo(pointsCurve[i].x, pointsCurve[i].y);
-         ctx.strokeStyle= '#7B1FA2';
-        ctx.lineWidth=3;
+         ctx.strokeStyle= '#FDD835';
+        ctx.lineWidth=5;
         ctx.stroke();
       }
     }
@@ -68,7 +70,7 @@ function drawCircles() {
   for (var i in points) {
     ctx.beginPath();
     ctx.arc(points[i].x, points[i].y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#F8BBD0';
+    ctx.fillStyle = '#CFD8DC';
     ctx.fill();
 
     if(i>0){
@@ -76,7 +78,7 @@ function drawCircles() {
         var posY= points[i-1].y;
         ctx.moveTo(posX,posY);
         ctx.lineTo(points[i].x,points[i].y);
-        ctx.strokeStyle= '#F8BBD0';
+        ctx.strokeStyle= '#CFD8DC';
         ctx.lineWidth=3;
         ctx.stroke();
     }
