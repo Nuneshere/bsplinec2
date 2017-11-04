@@ -14,7 +14,7 @@ var precisao = 1000, parametro = 1 / precisao;
 var l = 0; //segmento
 var i= 2;
 var j= 1;
-var pontosBspline= []; // pontos do bspline até 4 pontos
+var pontosBspline=[0,1]; // pontos do bspline até 4 pontos
 var copy=[]; //array com as copias dos pontos do array antes de um click.
 var valoresU = [0,10,20,30,40,50,60,70];
 var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
@@ -202,7 +202,7 @@ function delta(u1,u0){
 function makeCurva(){
     var pointsCurve = [];
     for (t = 0 ; t <= 1 ; t = t + parametro){
-        var pontosCastel = points.slice(0, qntPontos+1);
+        var pontosCastel = pontosBspline.slice(0, pontosBspline.length);
         deCasterjao(pontosCastel)
         pointsCurve.push(pontosCastel[0]);
     }   
@@ -219,7 +219,7 @@ function deCasterjao(pontosCastel){
 }
 
 function drawCurve(pointsCurve) {
-  if(qntPontos > 3) {
+  if(qntPontos >= 3) {
     for(var i in pointsCurve) {
       ctx.beginPath();
       
@@ -247,7 +247,6 @@ function clearCanvas()
       ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   points.splice(0,points.length);
-  p
   drawCircles();
 }
 
@@ -273,7 +272,7 @@ function drawCircles() {
         ctx.stroke();
     }
   }
-  if(qntPontos > 3) {
+  if(qntPontos >= 3) {
     makeCurva();
   }
 }
@@ -320,12 +319,13 @@ canvas.addEventListener('mousedown', e => {
     }
     imprimir(pontosDaCurva);
     
+    pontosBspline.splice(0,pontosBspline.length);
+    pontosBspline = pontosDaCurva.slice(0, pontosDaCurva.length);
+
     copy = pontosDaCurva.slice(0,pontosDaCurva.length+1);  //O COPY TA FUNCIONANDO 
     console.log( "valor de i: ",i, "valor de j: ", j);
     console.log("segmento: ", l);
-    drawCircles(); //traçando a bspline
     
-    //imprimir(pontosDaCurva);
   } else {
     move = true;
   }
