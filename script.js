@@ -272,29 +272,29 @@ function drawCircles() {
         ctx.stroke();
     }
   }
-  if(qntPontos >= 3) {
-    makeCurva();
-  }
 }
 
 
 function drawBsplines() {
   for (var i in pontosBspline) {
     ctx.beginPath();
-    ctx.arc(pontosBspline[i].x, pontosBspline[i].y, 3, 0, 2 * Math.PI);
+    ctx.arc(pontosBspline[i].x, pontosBspline[i].y, 6, 0, 2 * Math.PI);
     ctx.fillStyle = '#64B5F6';
     ctx.fill();
 
     if(i>0){
-        var posX= points[i-1].x;
-        var posY= points[i-1].y;
+        var posX= pontosBspline[i-1].x;
+        var posY= pontosBspline[i-1].y;
         ctx.moveTo(posX,posY);
         ctx.lineTo(pontosBspline[i].x,pontosBspline[i].y);
         ctx.strokeStyle= '#64B5F6';
-        ctx.lineWidth=1;
+        ctx.lineWidth=3;
         ctx.stroke();
     }
   }
+    if(qntPontos >= 3) {
+        makeCurva();
+      }
 }
 
 function dist(p1, p2) {
@@ -371,7 +371,8 @@ canvas.addEventListener('mousemove', e => {
 setInterval(() => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawCircles();
     drawBsplines();
+    drawCircles();
+    
   
 }, 500 / 30);
