@@ -277,6 +277,26 @@ function drawCircles() {
   }
 }
 
+
+function drawBsplines() {
+  for (var i in pontosBspline) {
+    ctx.beginPath();
+    ctx.arc(pontosBspline[i].x, pontosBspline[i].y, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = '#64B5F6';
+    ctx.fill();
+
+    if(i>0){
+        var posX= points[i-1].x;
+        var posY= points[i-1].y;
+        ctx.moveTo(posX,posY);
+        ctx.lineTo(pontosBspline[i].x,pontosBspline[i].y);
+        ctx.strokeStyle= '#64B5F6';
+        ctx.lineWidth=1;
+        ctx.stroke();
+    }
+  }
+}
+
 function dist(p1, p2) {
   var v = {x: p1.x - p2.x, y: p1.y - p2.y};
   return Math.sqrt(v.x * v.x + v.y * v.y);
@@ -350,8 +370,8 @@ canvas.addEventListener('mousemove', e => {
 
 setInterval(() => {
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawCircles();
-
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircles();
+    drawBsplines();
+  
 }, 500 / 30);
