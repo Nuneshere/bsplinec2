@@ -16,10 +16,12 @@ var i= 2;
 var j= 1;
 var pontosBspline= []; // pontos do bspline até 4 pontos
 var copy=[]; //array com as copias dos pontos do array antes de um click.
-
+var valoresU = [0,10,20,30,40,50,60,70];
 var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
 var contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
 var guarde;
+
+
 
 function imprimir(array){ //PRINTE ESTA OK
     if ( points.length <= 4 ){
@@ -48,10 +50,10 @@ function bspline(l,i,j){
     
     console.log(ultimo," ",penultimo," ",antePunultimo);
     if ( fakePoints.length <= 4){
-        pontosDaCurva.push(fakePoints[0]);
-        pontosDaCurva.push(fakePoints[1]);
-        pontosDaCurva.push(fakePoints[2]);
-        pontosDaCurva.push(fakePoints[3]);
+        pontosDaCurva.push(points[0]);
+        pontosDaCurva.push(points[1]);
+        pontosDaCurva.push(points[2]);
+        pontosDaCurva.push(points[3]);
         contador= 0 ; //até aqui ta ok!
         
     }
@@ -60,22 +62,20 @@ function bspline(l,i,j){
             pontosDaCurva.push(copy[m]);
         }  
         
-        pontosDaCurva.push( terceiro(100));
+        pontosDaCurva.push( terceiro() );
         if (qntPontos > 5){
-            for (var k = 2 ; k <= i ; k++ ){
+            for (var k = 2 ; k <= i ; k++ ){ // calculo de todos pontos extremos novamente
                 pontosDaCurva[(3*k)-2] = pontoExtremoEsq(k);
                 pontosDaCurva[(3*k)-1] = pontoExtremoDir(k);    
             }
             
         }
         
-        pontosDaCurva[antePunultimo] = antepenultimo(l);
-          
-        for (var u = 1 ; u <= j ; u++){
+        for (var u = 1 ; u <= j ; u++){ //calculo de todos os pontos de junção novamente
             pontosDaCurva[3*u]= pontoJuncao(u);
         }
         
-        pontosDaCurva[antePunultimo] = antepenultimo(l);    //recalculando o antepenultimo ponto pois o calculo deste é sempre estatico;
+        pontosDaCurva[antePunultimo] = antepenultimo(l); //recalculando o antepenultimo ponto pois o calculo deste é sempre estatico, e sobreescreve muitas vezes o calculo de extremo na direita;
         pontosDaCurva[penultimo] = copy[copy.length-1]; //adicionando o penultimo ponto pelo array que salvamso
         
 
@@ -83,30 +83,60 @@ function bspline(l,i,j){
 }
 
 function terceiro(i){
-    var x =i;
-    return x;
+    var corX = ( (ladoEsquerdo(1,0) * points[1].x ) + (ladoDireito(1,0)* points[2].x ) ) ; 
+    var corY = ( (ladoEsquerdo(1,0) * points[1].y ) + (ladoDireito(1,0)* points[2].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
 }
 
 function pontoJuncao(i){
-    var x  = 3000;
-    return x;
+    var corX = ( (ladoEsquerdo(i,i-1) * points[((3*i)-1)+1].x ) + (ladoDireito(i,i-1)* points[((3*i)+1)+1].x ) ) ; 
+    var corY = ( (ladoEsquerdo(i,i-1) * points[((3*i)-1)+1].y ) + (ladoDireito(i,i-1)* points[((3*i)+1)+1].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
 }
 
 function pontoExtremoEsq(i){
-    var x  = 5000;
+    var x  = 2000;
     return x;
 }
 
 function pontoExtremoDir(i){
-    var x  = 40000;
+    var x  = 4000;
     return x; 
 }
 
 function antepenultimo(l){
-    var x  = 12;
-    return x; 
+    var corX = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].x ) + (ladoDireito(l-1,l-2)* points[l+1].x )) ; 
+    var corY = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].y ) + (ladoDireito(l-1,l-2)* points[l+1].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto; 
+}
+    
+function ladoEsquerdo(valor1,valor0){
+    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+    return resposta;
 }
 
+function ladoDireito(valor1,valor0){
+    var resposta = (delta(valoresU[valor1],valoresU[valor0])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+    return resposta;
+}
+
+function esquerdoPenultimo(valor1,valor0){
+    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+    return resposta;
+}
+
+function direitoPenultimo(valor1,valor0){
+    var resposta = (delta(valoresU[valor1],valoresU[valor0])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+    return resposta;
+}
+
+function delta(u1,u0){
+    var resposta = u1-u0;
+    return resposta;
+}
 // CASTEJAU
 
 function makeCurva(){
@@ -215,10 +245,10 @@ canvas.addEventListener('mousedown', e => {
     qntPontos++;
     fakePoints.push(qntPontos); //adicionando no points fake 
     points.push(click); //adicionando no points
-    l = qntPontos - 3;   //alterando valor de l   
-    var pontosDaCurva = bspline(l,i,j); //analisando quais devem ser os pontos da bspline
+    l = qntPontos - 3;   //alterando valor de l -- segmentos utilizado por vezes no bspline
+    var pontosDaCurva = bspline(l,i,j); //rodando o bspline
     if ( qntPontos >4 ){
-        pontosDaCurva.push(qntPontos); //adicionando o ponto no final
+        pontosDaCurva.push(click); //adicionando o ponto no final
     }
     if( qntPontos > 4){
         i = i + 1;
