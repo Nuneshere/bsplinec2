@@ -43,12 +43,12 @@ function bspline(l,i,j){
     var pontosDaCurva=[];
     var ultimo = (3*l);
     var penultimo = (3*l)-1; 
-    var antePunultimo = (3*l)-2;
+    var antePenultimo = (3*l)-2;
     if( contador === 0){ //minifuncao para saber quantos do array antigo pontos guardar
         guarde = 1; //a variavel guarde deve guardar o primeiro e segunda posição do array
     }
     
-    console.log(ultimo," ",penultimo," ",antePunultimo);
+    console.log(ultimo," ",penultimo," ",antePenultimo);
     if ( fakePoints.length <= 4){
         pontosDaCurva.push(points[0]);
         pontosDaCurva.push(points[1]);
@@ -65,22 +65,41 @@ function bspline(l,i,j){
         pontosDaCurva.push( terceiro() );
         if (qntPontos > 5){
             for (var k = 2 ; k <= i ; k++ ){ // calculo de todos pontos extremos novamente
-                pontosDaCurva[(3*k)-2] = pontoExtremoEsq(k);
-                pontosDaCurva[(3*k)-1] = pontoExtremoDir(k);    
+                pontosDaCurva[(3*k)-2] = pontoExtremoDir(k);
+                pontosDaCurva[(3*k)-1] = pontoExtremoEsq(k);    
+            }        
+        }
+        
+        pontosDaCurva[antePenultimo] = antepenultimo(l); //recalculando o antepenultimo ponto pois o calculo deste é sempre estatico, e sobreescreve muitas vezes o calculo de extremo na direita;
+        
+        var dDaJuncao = 3; // essa é a posição d a qual estaremos calculando o ponto de junção, se ela for igual a 3 isso significa que estamos calculando o primeiro ponto de junção, levando em conta que b é o ponto que iremos calcular, nesse caso b-1 é com certeza o resultado do calculo do terceio, mas o b+1 pode ser tanto antepenultimo como mais um ponto qualquer extremo direito.
+        
+        for (var u = 1 ; u <= j ; u++){ //calculo de todos os pontos de junção note que não podemos simplemente colocar o calculo de pontos de junção para rodar, 
+            if (dDaJuncao==3){
+                if (qntPontos == 5){
+                     pontosDaCurva[3*u]= juncaoEstatico(u,pontosDaCurva,antePenultimo);
+                }else{
+                    pontosDaCurva[3*u]= juncaoEsqEstatico(u,pontosDaCurva);
+                } 
+            } else if ( dDaJuncao == qntPontos-2 ) {
+                if(qntPontos>5){
+                    pontosDaCurva[3*u]= juncaoDirEstatico(u,pontosDaCurva,antePenultimo);    
+                }
+                
+            } else{
+                pontosDaCurva[3*u]= juncaoNoEstatico(u,pontosDaCurva);
             }
-            
+            dDaJuncao++;
         }
         
-        for (var u = 1 ; u <= j ; u++){ //calculo de todos os pontos de junção novamente
-            pontosDaCurva[3*u]= pontoJuncao(u);
-        }
-        
-        pontosDaCurva[antePunultimo] = antepenultimo(l); //recalculando o antepenultimo ponto pois o calculo deste é sempre estatico, e sobreescreve muitas vezes o calculo de extremo na direita;
         pontosDaCurva[penultimo] = copy[copy.length-1]; //adicionando o penultimo ponto pelo array que salvamso
         
 
     } return pontosDaCurva;
 }
+
+// FUNCOES PARA CALCULO DE PONTOS DE BSPLINE
+// ----- calculando o terceiro ponto que nunca muda
 
 function terceiro(i){
     var corX = ( (ladoEsquerdo(1,0) * points[1].x ) + (ladoDireito(1,0)* points[2].x ) ) ; 
@@ -89,30 +108,57 @@ function terceiro(i){
     return ponto;
 }
 
-function pontoJuncao(i){
-    var corX = ( (ladoEsquerdo(i,i-1) * points[((3*i)-1)+1].x ) + (ladoDireito(i,i-1)* points[((3*i)+1)+1].x ) ) ; 
-    var corY = ( (ladoEsquerdo(i,i-1) * points[((3*i)-1)+1].y ) + (ladoDireito(i,i-1)* points[((3*i)+1)+1].y ) ) ; 
+function juncaoEstatico(i,pontosDaCurva,antePenultimo){
+    var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].x ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].x ) ) ; 
+    var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].y ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
+}
+function juncaoEsqEstatico(i,pontosDaCurva){
+    var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
+    var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
+}
+function juncaoDirEstatico(i,pontosDaCurva,antePenultimo){
+     var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].x ) ) ; 
+    var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].y ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
+}
+function juncaoNoEstatico(i,pontosDaCurva){
+     var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
+    var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
+    
+}
+// ----- calculando pontos extremos esquerdos e direitos
+function pontoExtremoEsq(i){
+    var corX = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].x ) + (direitoExtremoEsq(i,i-1)* points[i].x ) ) ; 
+    var corY = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].y ) + (direitoExtremoEsq(i,i-1)* points[i].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
 
-function pontoExtremoEsq(i){
-    var x  = 2000;
-    return x;
-}
-
 function pontoExtremoDir(i){
-    var x  = 4000;
-    return x; 
+    var corX = ( (esquerdoExtremoDir(i,i-1) * points[i-1].x ) + (direitaExtremoDir(i,i-1)* points[i].x ) ) ; 
+    var corY = ( (esquerdoExtremoDir(i,i-1) * points[i-1].y ) + (direitaExtremoDir(i,i-1)* points[i].y ) ) ; 
+    var ponto = {x:corX, y:corY}; 
+    return ponto;
 }
 
+// ----- calculando pontos antepenultimo
 function antepenultimo(l){
     var corX = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].x ) + (ladoDireito(l-1,l-2)* points[l+1].x )) ; 
     var corY = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].y ) + (ladoDireito(l-1,l-2)* points[l+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto; 
 }
-    
+  
+
+
+// FUNCOES AUXILIARES PARA CALCULO DOS PONTOS BSPLINE
 function ladoEsquerdo(valor1,valor0){
     var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
     return resposta;
@@ -123,13 +169,23 @@ function ladoDireito(valor1,valor0){
     return resposta;
 }
 
-function esquerdoPenultimo(valor1,valor0){
-    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+function esquerdoExtremoEsq(valor1,valor0){
+    var resposta = (delta(valoresU[(valor1)],valoresU[(valor0)]) + delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
     return resposta;
 }
 
-function direitoPenultimo(valor1,valor0){
-    var resposta = (delta(valoresU[valor1],valoresU[valor0])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
+function direitoExtremoEsq(valor1,valor0){
+    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+    return resposta;
+}
+
+function esquerdoExtremoDir(valor1,valor0){
+    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+    return resposta;
+}
+
+function direitaExtremoDir(valor1,valor0){
+    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) + delta(valoresU[(valor1)],valoresU[(valor0)]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
     return resposta;
 }
 
@@ -137,7 +193,11 @@ function delta(u1,u0){
     var resposta = u1-u0;
     return resposta;
 }
-// CASTEJAU
+
+
+
+
+// CASTEJAU-----------------------------------
 
 function makeCurva(){
     var pointsCurve = [];
@@ -175,6 +235,10 @@ function drawCurve(pointsCurve) {
     }
   }
 }
+
+
+
+
 
 // FUNCOES BASICAS DE CANVAS-----------------
 function clearCanvas()
