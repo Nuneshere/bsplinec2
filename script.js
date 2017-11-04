@@ -3,47 +3,109 @@ var ctx = canvas.getContext('2d');
 
 // INICIALIZANDO VARIAVEIS-----------------
 
-var points = [];
+var points = []; // pontos d adicionados ao clique
 var move = false;
 var index = -1;
 var qntPontos = 0;
 var grau = qntPontos - 1;
 var precisao = 1000, parametro = 1 / precisao;
 
-//BSPLINE
-
+//BSPLINE ARRAY
 var l = 0; //segmento
-var pontosBspline= [];
+var i= 2;
+var j= 1;
+var pontosBspline= []; // pontos do bspline até 4 pontos
+var copy=[]; //array com as copias dos pontos do array antes de um click.
 
-function imprimir(){
-    console.log("tamanho: ", pontosBspline.length);
-    for (var i = 0 ; i < pontosBspline.lenght-1 ; i++){
-        console.log(pontosBspline[i], " ");
-    }
-}
+var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
+var contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
+var guarde;
 
-function extremePoints(pontosOriginais,i){
-    if ( i === 0 & pontosBspline.length === 0){
-        pontosBspline.push(pontosOriginais[i]);
-    } else if (i === 1 & pontosBspline.length === 1){
-        pontosBspline.push(pontosOriginais[i]);
-    } else if ( i == pontosOriginais.length-1 & pontosOriginais.length >3){
-        pontosBspline.push(pontosOriginais[i]);
-        
-    } else if ( i == pontosOriginais.length-2 & pontosOriginais.length >3){
-        pontosBspline.push(pontosOriginais[i]);
-    }
-}
-
-function bspline(){
-    var pontosOriginais = points.slice(0, qntPontos+1);
-    for ( var i = 0  ; i<pontosOriginais.length; i++){
-        if (points.length >= 3 ){
-            extremePoints(pontosOriginais,i);
+function imprimir(array){ //PRINTE ESTA OK
+    if ( points.length <= 4 ){
+        console.log("tamanho: ", array.length );
+        for (var i = 0 ; i <= array.length-1 ; i++){
+            console.log("ponto da curva inferior ou igual 4 : ", array[i] );
+        }
+    } else{
+        console.log("tamanho: ", array.length );
+        for (var i = 0 ; i <= array.length-1; i++){
+            console.log("ponto da curva superior a 4: ", array[i] );
         }
     }
+        
 }
+
+
+function bspline(l,i,j){
+    var pontosDaCurva=[];
+    var ultimo = (3*l);
+    var penultimo = (3*l)-1; 
+    var antePunultimo = (3*l)-2;
+    if( contador === 0){ //minifuncao para saber quantos do array antigo pontos guardar
+        guarde = 1; //a variavel guarde deve guardar o primeiro e segunda posição do array
+    }
     
+    console.log(ultimo," ",penultimo," ",antePunultimo);
+    if ( fakePoints.length <= 4){
+        pontosDaCurva.push(fakePoints[0]);
+        pontosDaCurva.push(fakePoints[1]);
+        pontosDaCurva.push(fakePoints[2]);
+        pontosDaCurva.push(fakePoints[3]);
+        contador= 0 ; //até aqui ta ok!
+        
+    }
+    else{
+        for ( var m = 0 ; m <= guarde ; m++){ //guardando os primeiros 2 pontos
+            pontosDaCurva.push(copy[m]);
+        }  
+        
+        pontosDaCurva.push( terceiro(100));
+        if (qntPontos > 5){
+            for (var k = 2 ; k <= i ; k++ ){
+                pontosDaCurva[(3*k)-2] = pontoExtremoEsq(k);
+                pontosDaCurva[(3*k)-1] = pontoExtremoDir(k);    
+            }
+            
+        }
+        
+        pontosDaCurva[antePunultimo] = antepenultimo(l);
+          
+        for (var u = 1 ; u <= j ; u++){
+            pontosDaCurva[3*u]= pontoJuncao(u);
+        }
+        
+        pontosDaCurva[antePunultimo] = antepenultimo(l);    //recalculando o antepenultimo ponto pois o calculo deste é sempre estatico;
+        pontosDaCurva[penultimo] = copy[copy.length-1]; //adicionando o penultimo ponto pelo array que salvamso
+        
+
+    } return pontosDaCurva;
+}
+
+function terceiro(i){
+    var x =i;
+    return x;
+}
+
+function pontoJuncao(i){
+    var x  = 3000;
+    return x;
+}
+
+function pontoExtremoEsq(i){
+    var x  = 5000;
+    return x;
+}
+
+function pontoExtremoDir(i){
+    var x  = 40000;
+    return x; 
+}
+
+function antepenultimo(l){
+    var x  = 12;
+    return x; 
+}
 
 // CASTEJAU
 
@@ -76,7 +138,7 @@ function drawCurve(pointsCurve) {
         var yAtual = pointsCurve[i-1].y;
         ctx.moveTo(xAtual, yAtual);
         ctx.lineTo(pointsCurve[i].x, pointsCurve[i].y);
-         ctx.strokeStyle= '#FDD835';
+        ctx.strokeStyle= '#FDD835';
         ctx.lineWidth=5;
         ctx.stroke();
       }
@@ -151,14 +213,25 @@ canvas.addEventListener('mousedown', e => {
   index = getIndex(click);
   if (index === -1) {
     qntPontos++;
-    points.push(click);
-    drawCircles();
-    if ( qntPontos >4){
-        l = qntPontos - 3;     
+    fakePoints.push(qntPontos); //adicionando no points fake 
+    points.push(click); //adicionando no points
+    l = qntPontos - 3;   //alterando valor de l   
+    var pontosDaCurva = bspline(l,i,j); //analisando quais devem ser os pontos da bspline
+    if ( qntPontos >4 ){
+        pontosDaCurva.push(qntPontos); //adicionando o ponto no final
     }
-    bspline();
-    console.log(l , "<- segmentos");
-    imprimir();
+    if( qntPontos > 4){
+        i = i + 1;
+        j = j + 1;
+    }
+    imprimir(pontosDaCurva);
+    
+    copy = pontosDaCurva.slice(0,pontosDaCurva.length+1);  //O COPY TA FUNCIONANDO 
+    console.log( "valor de i: ",i, "valor de j: ", j);
+    console.log("segmento: ", l);
+    drawCircles(); //traçando a bspline
+    
+    //imprimir(pontosDaCurva);
   } else {
     move = true;
   }
@@ -169,12 +242,7 @@ canvas.addEventListener('mouseup', e => {
   move = false;
 });
 
-canvas.addEventListener('dblclick', e => {
-  if (index !== -1) {
-    points.splice(index, 1);
-    qntPontos--;
-  }
-});
+
 
 
 canvas.addEventListener('mousemove', e => {
