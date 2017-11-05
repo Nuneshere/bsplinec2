@@ -66,7 +66,7 @@ function bspline(l,i,j){
         if (qntPontos > 5){
             for (var k = 2 ; k <= i ; k++ ){ // calculo de todos pontos extremos novamente
                 pontosDaCurva[(3*k)-2] = pontoExtremoDir(k);
-                pontosDaCurva[(3*k)-1] = pontoExtremoEsq(k);    
+                pontosDaCurva[(3*k)-1] = pontoExtremoEsq(k);  
             }        
         }
         
@@ -135,19 +135,18 @@ function juncaoNoEstatico(i,pontosDaCurva){
 }
 // ----- calculando pontos extremos esquerdos e direitos
 function pontoExtremoEsq(i){
-    var corX = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].x ) + (direitoExtremoEsq(i,i-1)* points[i].x ) ) ; 
-    var corY = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].y ) + (direitoExtremoEsq(i,i-1)* points[i].y ) ) ; 
+    var corX = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].x ) + (direitoExtremoEsq(i)* points[i+1].x ) ) ; 
+    var corY = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].y ) + (direitoExtremoEsq(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
 
-function pontoExtremoDir(i){
-    var corX = ( (esquerdoExtremoDir(i,i-1) * points[i-1].x ) + (direitaExtremoDir(i,i-1)* points[i].x ) ) ; 
-    var corY = ( (esquerdoExtremoDir(i,i-1) * points[i-1].y ) + (direitaExtremoDir(i,i-1)* points[i].y ) ) ; 
+function pontoExtremoDir(i){ //3*i-2
+    var corX = ( (esquerdaExtremoDir(i) * points[(i-1)+1].x ) + (direitaExtremoDir(i)* points[i+1].x ) ) ; 
+    var corY = ( (esquerdaExtremoDir(i) * points[(i-1)+1].y ) + (direitaExtremoDir(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
-
 // ----- calculando pontos antepenultimo
 function antepenultimo(l){
     var corX = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].x ) + (ladoDireito(l-1,l-2)* points[l+1].x )) ; 
@@ -169,25 +168,26 @@ function ladoDireito(valor1,valor0){
     return resposta;
 }
 
-function esquerdoExtremoEsq(valor1,valor0){
-    var resposta = (delta(valoresU[(valor1)],valoresU[(valor0)]) + delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function esquerdoExtremoEsq(i){ //3k-1
+    var resposta = ((delta(valoresU[i+1],valoresU[i])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i]))  );
     return resposta;
 }
 
-function direitoExtremoEsq(valor1,valor0){
-    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function direitoExtremoEsq(i){ //3k-1
+    var resposta = ( ((delta(valoresU[i],valoresU[i-1])) + delta(valoresU[i-1],valoresU[i-2])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])));
     return resposta;
 }
 
-function esquerdoExtremoDir(valor1,valor0){
-    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function esquerdaExtremoDir(i){ //3k-2
+    var resposta = ((delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i]) ));
     return resposta;
 }
 
-function direitaExtremoDir(valor1,valor0){
-    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) + delta(valoresU[(valor1)],valoresU[(valor0)]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function direitaExtremoDir(i){ //3k-2
+    var resposta = ((delta(valoresU[i-1],valoresU[i-2])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])));
     return resposta;
 }
+
 
 function delta(u1,u0){
     var resposta = u1-u0;
@@ -203,6 +203,11 @@ function makeCurva(){
     var pointsCurve = [];
     for (t = 0 ; t <= 1 ; t = t + parametro){
         var pontosCastel = pontosBspline.slice(0, pontosBspline.length);
+        //var pontosCastel = [];
+        //pontosCastel[0] = pontosBspline[0];
+        //pontosCastel[1] = pontosBspline[1];
+        //pontosCastel[2] = pontosBspline[2];
+        //pontosCastel[3] = pontosBspline[3];
         deCasterjao(pontosCastel)
         pointsCurve.push(pontosCastel[0]);
     }   
