@@ -278,7 +278,7 @@ function addInput(pointNumber, pointValue){
     
     var input = $("<input/>")
         .attr("id", pointNumber)
-        .attr("value", pointValue)
+        .attr("value", pointValue.toFixed(2)) //coloquei isso para não ficar aparecendo muitos digitos depois da virgula
         .attr("class", "active")
         .attr("type", "number")
     
