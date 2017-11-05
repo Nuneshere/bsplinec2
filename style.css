@@ -13,7 +13,7 @@ html,body  {
   height: 100%;
 }
 
-button{
+/*button{
   background-color: transparent;
   color: #2196F3;
     font-weight: 700;
@@ -29,7 +29,7 @@ button{
 button:hover{
   color: white;
   background-color: #2196F3;
-}
+} */
 
 canvas{
   background-color: #455A64;

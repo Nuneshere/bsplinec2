@@ -8,7 +8,7 @@ var move = false;
 var index = -1;
 var qntPontos = 0;
 var grau = qntPontos - 1;
-var precisao = 1000, parametro = 1 / precisao;
+var precisao = 2000, parametro = 1 / precisao;
 
 //BSPLINE ARRAY
 var l = 0; //segmento
@@ -16,13 +16,21 @@ var i= 2;
 var j= 1;
 var pontosBspline=[0,1]; // pontos do bspline até 4 pontos
 var copy=[]; //array com as copias dos pontos do array antes de um click.
-var valoresU = [0,10,20,30,40,50,60,70,80,90,100,110,120];
+var valoresU = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200];
 var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
 var contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
 var guarde;
 var qntCurvas=1;
 
+var fechada = false;
 
+
+
+
+
+
+ 
+ //--- print
 function imprimir(array){ //PRINTE ESTA OK
     if ( points.length <= 4 ){
         console.log("tamanho: ", array.length );
@@ -207,12 +215,12 @@ function makeCurva(bspline){
         for (var e = 0 ; e < bspline.length ; e++){
             pontosCastel.push({x: bspline[e].x , y:bspline[e].y });
         }
-        deCasterjao(pontosCastel);
+        deCasterjao(pontosCastel,t); // o mito!
         pointsCurve.push(pontosCastel[0]);
     }   
     drawCurve(pointsCurve);
 }
-function deCasterjao(pontosCastel){   
+function deCasterjao(pontosCastel,t){   
     for(n = 1; n < pontosCastel.length ; n++) {
       for(p = 0; p < pontosCastel.length - n; p++) {
         var cordX = (1 - t) * pontosCastel[p].x + t * pontosCastel[p+1].x;
@@ -245,6 +253,18 @@ function drawCurve(pointsCurve) {
 
 
 // FUNCOES BASICAS DE CANVAS-----------------
+var valoru = [];
+var idInput = 0; 
+function addInput(){
+    var txt1 = $("<input></input>").attr('type','number').attr('id',idInput++);
+    $("#dale").append(txt1);
+}
+
+function addValorU(id){
+    var valor = document.getElementById(id);
+    valoru[id] = $('#id').val();
+}
+
 function clearCanvas()
 {
   var canvas = document.getElementById('canvas'),
@@ -260,6 +280,7 @@ function clearCanvas()
     guarde;
     qntPontos = 0;
     points = [];
+    fechada =false;
   drawCircles();
 }
 
@@ -336,6 +357,14 @@ function getIndex(click) {
   return -1;
 }
 
+function verdade(){
+    fechada=true;
+    drawBsplines();
+}
+function falso(){
+    fechada=false;
+    drawBsplines();
+}
 
 
 
@@ -349,14 +378,22 @@ resizeCanvas();
 canvas.addEventListener('mousedown', e => {
   var click = {x: e.offsetX, y: e.offsetY, v:{x: 0, y:0}};
   index = getIndex(click);
+  
   if (index === -1) {
+    addInput();
+    console.log("UEHUHUEUHEHUEHUEHU");
+    imprimir(valoru);
     qntPontos++;
     fakePoints.push(qntPontos); //adicionando no points fake 
     points.push(click); //adicionando no points
     l = qntPontos - 3;   //alterando valor de l -- segmentos utilizado por vezes no bspline
     var pontosDaCurva = bspline(l,i,j); //rodando o bspline
     if ( qntPontos >4 ){
-        pontosDaCurva.push(click); //adicionando o ponto no final
+        if(fechada===false){
+            pontosDaCurva.push(click);
+        }else {
+            pontosDaCurva.push(points[0]);
+        } //adicionando o ponto no final
         qntCurvas++;
     }
     if( qntPontos > 4){
@@ -391,4 +428,4 @@ setInterval(() => {
     }
     drawCircles();
   
-}, 500 / 30);
+}, 2000 / 30);
