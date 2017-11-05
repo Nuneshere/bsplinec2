@@ -16,23 +16,23 @@ var i= 2;
 var j= 1;
 var pontosBspline=[0,1]; // pontos do bspline até 4 pontos
 var copy=[]; //array com as copias dos pontos do array antes de um click.
-var valoresU = [0,10,20,30,40,50,60,70];
+var valoresU = [0,10,20,30,40,50,60,70,80,90,100,110,120];
 var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
 var contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
 var guarde;
-
+var qntCurvas=1;
 
 
 function imprimir(array){ //PRINTE ESTA OK
     if ( points.length <= 4 ){
         console.log("tamanho: ", array.length );
         for (var i = 0 ; i <= array.length-1 ; i++){
-            console.log("ponto da curva inferior ou igual 4 : ", array[i] );
+            console.log("esse é um ponto de bezier : ", array[i] );
         }
     } else{
         console.log("tamanho: ", array.length );
         for (var i = 0 ; i <= array.length-1; i++){
-            console.log("ponto da curva superior a 4: ", array[i] );
+            console.log("esse é um ponto de bezier: ", array[i] );
         }
     }
         
@@ -199,23 +199,22 @@ function delta(u1,u0){
 
 // CASTEJAU-----------------------------------
 
-function makeCurva(){
+function makeCurva(bspline){
     var pointsCurve = [];
+    console.log("HELLOOOOO");
     for (t = 0 ; t <= 1 ; t = t + parametro){
-        var pontosCastel = pontosBspline.slice(0, pontosBspline.length);
-        //var pontosCastel = [];
-        //pontosCastel[0] = pontosBspline[0];
-        //pontosCastel[1] = pontosBspline[1];
-        //pontosCastel[2] = pontosBspline[2];
-        //pontosCastel[3] = pontosBspline[3];
-        deCasterjao(pontosCastel)
+        var pontosCastel = [];
+        for (var e = 0 ; e < bspline.length ; e++){
+            pontosCastel.push({x: bspline[e].x , y:bspline[e].y });
+        }
+        deCasterjao(pontosCastel);
         pointsCurve.push(pontosCastel[0]);
     }   
     drawCurve(pointsCurve);
 }
 function deCasterjao(pontosCastel){   
-    for(n = 1; n < qntPontos ; n++) {
-      for(p = 0; p < qntPontos - n; p++) {
+    for(n = 1; n < pontosCastel.length ; n++) {
+      for(p = 0; p < pontosCastel.length - n; p++) {
         var cordX = (1 - t) * pontosCastel[p].x + t * pontosCastel[p+1].x;
         var cordY = (1 - t) * pontosCastel[p].y + t * pontosCastel[p+1].y;
         pontosCastel[p] = {x: cordX, y: cordY};
@@ -249,9 +248,18 @@ function drawCurve(pointsCurve) {
 function clearCanvas()
 {
   var canvas = document.getElementById('canvas'),
-      ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  points.splice(0,points.length);
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var l = 0; //segmento
+    i= 2;
+    j= 1;
+    pontosBspline=[]; // pontos do bspline até 4 pontos
+    copy=[]; //array com as copias dos pontos do array antes de um click.
+    fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
+    contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
+    guarde;
+    qntPontos = 0;
+    points = [];
   drawCircles();
 }
 
@@ -297,9 +305,21 @@ function drawBsplines() {
         ctx.stroke();
     }
   }
-    if(qntPontos >= 3) {
-        makeCurva();
-      }
+  for(var w = 0 ; w < qntCurvas ; w++){
+      //pontosBspline  4-4
+        var inferior = w*3; 
+        var superior = inferior+3;
+        var array=[];
+
+        for (var e = inferior ; e <= superior ; e++){
+            array.push({x: pontosBspline[e].x , y:pontosBspline[e].y });
+        }
+        if(qntPontos >= 3){
+            makeCurva(array);
+        }  
+  }
+  
+
 }
 
 function dist(p1, p2) {
@@ -337,6 +357,7 @@ canvas.addEventListener('mousedown', e => {
     var pontosDaCurva = bspline(l,i,j); //rodando o bspline
     if ( qntPontos >4 ){
         pontosDaCurva.push(click); //adicionando o ponto no final
+        qntCurvas++;
     }
     if( qntPontos > 4){
         i = i + 1;
@@ -348,8 +369,9 @@ canvas.addEventListener('mousedown', e => {
     pontosBspline = pontosDaCurva.slice(0, pontosDaCurva.length);
 
     copy = pontosDaCurva.slice(0,pontosDaCurva.length+1);  //O COPY TA FUNCIONANDO 
-    console.log( "valor de i: ",i, "valor de j: ", j);
-    console.log("segmento: ", l);
+    //console.log( "valor de i: ",i, "valor de j: ", j);
+    //console.log("segmento: ", l);
+    console.log("quantidade de pontos: ", qntPontos,"quantidade de curvas : ",qntCurvas );
     
   } else {
     move = true;
@@ -362,22 +384,11 @@ canvas.addEventListener('mouseup', e => {
 });
 
 
-
-
-canvas.addEventListener('mousemove', e => {
-  if (move) {
-    var old = points[index];
-    points[index] = {x: e.offsetX, y: e.offsetY, v: {x: 0, y: 0}};
-    points[index].v = {x: e.offsetX - old.x, y: e.offsetY - old.y};
-    drawCircles();
-  }
-});
-
 setInterval(() => {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBsplines();
+    if (qntPontos>=3){
+        drawBsplines();
+    }
     drawCircles();
-    
   
 }, 500 / 30);
