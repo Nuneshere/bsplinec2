@@ -257,7 +257,12 @@ function drawCurve(pointsCurve) {
         var yAtual = pointsCurve[i-1].y;
         ctx.moveTo(xAtual, yAtual);
         ctx.lineTo(pointsCurve[i].x, pointsCurve[i].y);
-        ctx.strokeStyle= '#FDD835';
+        if(comCurva ===true){
+            ctx.strokeStyle= '#FDD835';
+        }else{
+            ctx.strokeStyle='transparent';
+        }
+        
         ctx.lineWidth=5;
         ctx.stroke();
       }
@@ -348,7 +353,12 @@ function drawCircles() {
   for (var i in points) {
     ctx.beginPath();
     ctx.arc(points[i].x, points[i].y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#CFD8DC';
+    if(comD ===true){
+        ctx.fillStyle = '#CFD8DC';
+    }else{
+         ctx.fillStyle = 'transparent';
+    }
+      
     ctx.fill();
 
     if(i>0){
@@ -356,7 +366,12 @@ function drawCircles() {
         var posY= points[i-1].y;
         ctx.moveTo(posX,posY);
         ctx.lineTo(points[i].x,points[i].y);
-        ctx.strokeStyle= '#CFD8DC';
+        if(comD ===true){
+             ctx.strokeStyle= '#CFD8DC';
+        }else{
+         ctx.strokeStyle= 'transparent';
+        }
+       
         ctx.lineWidth=3;
         ctx.stroke();
     }
@@ -367,7 +382,11 @@ function drawBsplines() {
   for (var i in pontosBspline) {
     ctx.beginPath();
     ctx.arc(pontosBspline[i].x, pontosBspline[i].y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#64B5F6';
+    if(comSpline ===true){
+        ctx.fillStyle = '#64B5F6';
+    }else{
+         ctx.fillStyle= 'transparent';
+    }
     ctx.fill();
 
     if(i>0){
@@ -375,7 +394,11 @@ function drawBsplines() {
         var posY= pontosBspline[i-1].y;
         ctx.moveTo(posX,posY);
         ctx.lineTo(pontosBspline[i].x,pontosBspline[i].y);
-        ctx.strokeStyle= '#64B5F6';
+        if(comSpline ===true){
+            ctx.strokeStyle= '#64B5F6';
+        }else{
+         ctx.strokeStyle= 'transparent';
+    }
         ctx.lineWidth=3;
         ctx.stroke();
     }
@@ -407,7 +430,34 @@ function falso(){
     fechada=false;
     drawBsplines();
 } //metodo que diz se o radio button de fechado não foi clicado
+var comD=true;
+var comSpline =true;
+var comCurva =true;
+function comPontochange(){
+    if (comD===true){
+        comD = false;
+    }else if ( comD ===false){
+        comD = true;
+    }
+    
+}
 
+function comSplinechange(){
+    if (comSpline===true){
+        comSpline = false;
+    }else if ( comSpline ===false){
+        comSpline = true;
+    } 
+}
+initCanvasSize();
+
+function comCurvachange(){
+    if (comCurva===true){
+        comCurva = false;
+    }else if ( comCurva ===false){
+        comCurva = true;
+    } 
+}
 initCanvasSize();
 
 
