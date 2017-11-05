@@ -17,16 +17,17 @@
   <body style="background-color:#FEFEFE; padding-left:0px; padding-right:0px" >
     <div>
       <h1>
-        <strong style="margin-left:20px;">B-Spline Cúbica C2 :) </strong> 
+        <strong style="margin-left:20px;color:#263238;">B-Spline Cúbica C2 Aberta e Fechada :) </strong> 
       </h1>
       <canvas style="height: 450px; width: 1400px; margin-top:10px; " id="canvas" ></canvas>
       <br>
+      <h4 style="margin-left:20px; margin-top:20px; margin-bottom:20px;">As mudanças terão efeito no próximo clique. </h4>
       <div class="row">
         
         <a class="waves-effect waves-light btn" onclick="clearCanvas()" style="border-radius:40px; margin-left:40px; margin-top:10px;padding-left:10px;background-color:#2196F3; color:#fff; text-weight:600;">DELETAR TODOS BOTÕES</a>
       
        <form style="padding-left:40px; margin-top:5px" action="#">
-        <a>Clique para escolher, mudanças tomão efeito no próximo clique. </a>
+        
         <p>
           <input class="with-gap" onclick="falso()" name="group1" type="radio" id="test1" checked />
           <label for="test1"  >Aberta</label>
@@ -41,19 +42,18 @@
       
       </div>
       
-       <div class="container" >
-          
-            <div id="dale" style="margin-left:10px;margin-right:10px; width:55px;" class="input-field  row">
-               <input id="divao" value="0"  type="number" class="validate">
-               <a class="waves-effect waves-light btn">go</a>
-               
-               
-            </div>  
-            
-            
-            
-         
-      </div>
+    <div style="margin:0px;" class="container">
+        <div class="row">
+        
+           <div style="padding-bottom:10px;" class="col s10 m10 l10">
+                <h5 style="margin-bottom:20px;">Valores do parâmetro u: </h5>
+                <a id="u-update-button" style="color: white; text-weight:600; border-radius:40px;background-color:#607D8B;" class="waves-effect waves-light btn">atualizar VALORES</a>
+            </div>
+        </div>
+        <div id="u-inputs" class="row"> 
+
+        </div>
+    </div>
       
       
       <br>
