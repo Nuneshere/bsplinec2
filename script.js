@@ -1,32 +1,38 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
-// INICIALIZANDO VARIAVEIS-----------------
+
+// NOTAS
+// a bspline é calculada todas vezes que damos um click pela funcao bspline, a funcao makecurva cria uma curva e é chamada em cada click 
+
+
+// ----------------- INICIALIZANDO VARIAVEIS GERAIS
 
 var points = []; // pontos d adicionados ao clique
 var index = -1;
 var qntPontos = 0;
 var grau = qntPontos - 1;
-var precisao = 2000, parametro = 1 / precisao;
+var precisao = 2000, parametro = 1 / precisao; //precisao de bezier
 
-//BSPLINE ARRAY
+// -------------- TODAS ESSAS VARIAVEIS SAO IMPORTANTES PARA BSPLINE C2 
 var l = 0; //segmento
-var i= 2;
-var j= 1;
-var pontosBspline=[0,1]; // pontos do bspline até 4 pontos
-var copy=[]; //array com as copias dos pontos do array antes de um click.
+var i= 2; // i inicializado para calculo de bspline no segmento tipico
+var j= 1; // j inicializado para calculo de bspline nas juncoes
+var pontosBspline=[0,1]; // array final com todos os pontos de bspline
+var copy=[]; //array com as copias dos pontos bspline do array antes de um click.
 
-var defaultU = 0;
-var valoresU = [];
+var u = 0; //qual parametro u devemos calcular
+var valoresU =[];  //esses valores previamente são os da "corda"
 
-var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
-var qntCurvas=1;
+//var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
 
-var fechada = false;
+var qntCurvas=1; //quantidade de curvas no nosso bspline
+
+var fechada = false; // se a curva deve ou não ser fechada
 
 
- //--- print
-function imprimir(array){ //PRINTE ESTA OK
+
+function imprimir(array){ 
     if ( points.length <= 4 ){
         console.log("tamanho: ", array.length );
         for (var i = 0 ; i <= array.length-1 ; i++){
@@ -93,31 +99,30 @@ function bspline(l,i,j){
         
 
     } return pontosDaCurva;
-}
+} // calculo geral da bspline
 
-// FUNCOES PARA CALCULO DE PONTOS DE BSPLINE
-// ----- calculando o terceiro ponto que nunca muda
+//--------------------  FUNCOES PARA CALCULO DE PONTOS DE BSPLINE
 
 function terceiro(i){
     var corX = ( (ladoEsquerdo(1,0) * points[1].x ) + (ladoDireito(1,0)* points[2].x ) ) ; 
     var corY = ( (ladoEsquerdo(1,0) * points[1].y ) + (ladoDireito(1,0)* points[2].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
-}
+}  //este metodo é o que cacula o B2 nas bspline, também chamado de ponto 3 de bezier
 
 function juncaoEstatico(i,pontosDaCurva,antePenultimo){
     var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].x ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].y ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
-}
+} //essa é a formula para calcular pontos de juncao caso so tenhamos 5 pontos, estatico pois o ponto a sua esquerda e direita nao necessitam de formulas "tipicas" para serem calculados
 
 function juncaoEsqEstatico(i,pontosDaCurva){
     var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
-}
+} // calcula ponto de juncao no cenario que o ponto a direita é calculado com formula tipica, e o esquerda é estatico, sendo o ponto 3 de bezier
 
 function juncaoDirEstatico(i,pontosDaCurva,antePenultimo){
      var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].x ) ) ; 
@@ -126,39 +131,42 @@ function juncaoDirEstatico(i,pontosDaCurva,antePenultimo){
     return ponto;
 }
 
+ // calcula ponto de juncao no cenario que o ponto a esquerda é calculado com formula tipica, e o direita é estatico, sendo o penultimo ponto de bezier
+
 function juncaoNoEstatico(i,pontosDaCurva){
      var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
     
-}
+} //calcula ponto de juncao quando nao temos pontos estaticos
 
-// ----- calculando pontos extremos esquerdos e direitos
+// ------------------  calculando pontos extremos esquerdos e direitos
 function pontoExtremoEsq(i){
     var corX = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].x ) + (direitoExtremoEsq(i)* points[i+1].x ) ) ; 
     var corY = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].y ) + (direitoExtremoEsq(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
-}
+} //calculo do ponto tipico mais a esquerda 
 
 function pontoExtremoDir(i){ //3*i-2
     var corX = ( (esquerdaExtremoDir(i) * points[(i-1)+1].x ) + (direitaExtremoDir(i)* points[i+1].x ) ) ; 
     var corY = ( (esquerdaExtremoDir(i) * points[(i-1)+1].y ) + (direitaExtremoDir(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
-}
+} //calculo do ponto tipico mais a direita
 
-// ----- calculando pontos antepenultimo
+// ---------------------- calculando pontos antepenultimo
 function antepenultimo(l){
     var corX = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].x ) + (ladoDireito(l-1,l-2)* points[l+1].x )) ; 
     var corY = ( (ladoEsquerdo(l-1,l-2) * points[(l-1)+1].y ) + (ladoDireito(l-1,l-2)* points[l+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto; 
-}
+} 
   
 
-// FUNCOES AUXILIARES PARA CALCULO DOS PONTOS BSPLINE
+// -------------------FUNCOES AUXILIARES PARA CALCULO DOS PONTOS BSPLINE
+// essas funcoes partes das formulas necessarias para o calculo dos pontos.
 function ladoEsquerdo(valor1,valor0){
     var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
     return resposta;
@@ -194,20 +202,26 @@ function delta(u1,u0){
     return resposta;
 }
 
-// AUXILIAR
-function incrementValoresU() {
-    // TEM QUE CALCULAR O u E ATUALIZAR NA LISTA
-    if (defaultU === 0) {
-        valoresU.push(defaultU);
-        defaultU = 10;
-    } else {
-        defaultU = valoresU[valoresU.length-1] + 10 ;
-        valoresU.push(defaultU);
-    }
+// ------------------- FUNCAO DE CALCULO DE CORDA
+
+function calculoCorda(u){
+    console.log("valor da norma :", norma(points[u-1],points[u-2]) ) ;
+    var corda = (valoresU[u-2]) + (norma(points[u-1],points[u-2]));
+    console.log("valor da corda: ",corda );
+    return corda;
+}
+function norma(ponto1,ponto2){
+    var x = (ponto1.x - ponto2.x);
+    var y = (ponto1.y - ponto2.y);
+    var quadradox = Math.pow(x,2);
+    var quadradoy = Math.pow(y,2);
+    var normaa = Math.sqrt(quadradox + quadradoy);
+    return normaa;
 }
 
 
-// CASTEJAU -----------------------------------
+
+// ----------------------------------- CASTEJAU 
 
 function makeCurva(bspline){
     var pointsCurve = [];
@@ -221,7 +235,7 @@ function makeCurva(bspline){
         pointsCurve.push(pontosCastel[0]);
     }   
     drawCurve(pointsCurve);
-}
+} //metodo que irá chamar o deCasterjao, gerando pontos da curva
 
 function deCasterjao(pontosCastel,t){   
     for(n = 1; n < pontosCastel.length ; n++) {
@@ -231,7 +245,7 @@ function deCasterjao(pontosCastel,t){
         pontosCastel[p] = {x: cordX, y: cordY};
       }
     }
-}
+} //calculo de castejau
 
 function drawCurve(pointsCurve) {
   if(qntPontos >= 3) {
@@ -249,11 +263,11 @@ function drawCurve(pointsCurve) {
       }
     }
   }
-}
+} // metodo para desenhar curvas
 
 
 
-// FUNCOES BASICAS DE CANVAS -----------------
+// ----------------- FUNCOES BASICAS DE CANVAS 
 function addInput(pointNumber, pointValue){
     var rowInputs = $("#u-inputs");
     
@@ -277,11 +291,11 @@ function addInput(pointNumber, pointValue){
     div.append(label);
     
     rowInputs.append(div);
-}
+}  //metodo para adicionar inputs
 
 function clearInputs() {
     $( "#u-inputs" ).empty();
-}
+} // metodo para limpar o canvas
 
 $("#u-update-button").on("click", updateValuesU);
 
@@ -313,16 +327,17 @@ function clearCanvas() {
     pontosBspline=[0,1]; // pontos do bspline até 4 pontos
     copy=[]; //array com as copias dos pontos do array antes de um click.
 
-    defaultU = 0;
+    
     valoresU = [];
-
+    u = 0; 
+    
     fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
     qntCurvas = 1;
 
     fechada = false;
     
     clearInputs();
-}
+} //metodo que reinicia todas variveis
 
 function initCanvasSize() {
   canvas.width = parseFloat(window.getComputedStyle(canvas).width);
@@ -386,28 +401,34 @@ function drawBsplines() {
 
 function verdade(){
     fechada=true;
-}
+} //metodo que diz se o radio button de fechado foi clicado
 
 function falso(){
     fechada=false;
     drawBsplines();
-}
+} //metodo que diz se o radio button de fechado não foi clicado
 
-function criarCurva(){
-    
-}
 initCanvasSize();
 
 
 
-// ACOES NO MOUSE-----------------
+// ----------------- ACOES NO MOUSE
 canvas.addEventListener('mousedown', e => {
     var click = {x: e.offsetX, y: e.offsetY, v:{x: 0, y:0}};
-
+    
     points.push(click); //adicionando no points
+    u  = u + 1; 
+    if (u===1){
+        valoresU.push(0); //se u1 entao o parametro sera igual a 0
+    }else{
+        var cordaU = calculoCorda(u); // se u>1 entao o parametro sera igual a corda.
+        valoresU.push(cordaU);
+        
+    }
+    console.log("valores de default: ", valoresU);
     qntPontos = points.length;
 
-    incrementValoresU();
+    //incrementValoresU();
     addInput(qntPontos-1, valoresU[qntPontos-1]);
 
     //fakePoints.push(qntPontos); //adicionando no points fake 
