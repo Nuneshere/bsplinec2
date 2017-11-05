@@ -4,61 +4,58 @@ var ctx = canvas.getContext('2d');
 // INICIALIZANDO VARIAVEIS-----------------
 
 var points = []; // pontos d adicionados ao clique
-var move = false;
 var index = -1;
 var qntPontos = 0;
 var grau = qntPontos - 1;
-var precisao = 1000, parametro = 1 / precisao;
+var precisao = 2000, parametro = 1 / precisao;
 
 //BSPLINE ARRAY
 var l = 0; //segmento
 var i= 2;
 var j= 1;
-var pontosBspline= []; // pontos do bspline até 4 pontos
+var pontosBspline=[0,1]; // pontos do bspline até 4 pontos
 var copy=[]; //array com as copias dos pontos do array antes de um click.
-var valoresU = [0,10,20,30,40,50,60,70];
+
+var defaultU = 0;
+var valoresU = [];
+
 var fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
-var contador=0;   // para saber quantas vezes foram calculados novos pontos para a curva
-var guarde;
+var qntCurvas=1;
+
+var fechada = false;
 
 
-
+ //--- print
 function imprimir(array){ //PRINTE ESTA OK
     if ( points.length <= 4 ){
         console.log("tamanho: ", array.length );
         for (var i = 0 ; i <= array.length-1 ; i++){
-            console.log("ponto da curva inferior ou igual 4 : ", array[i] );
+            console.log("esse é um ponto de bezier : ", array[i] );
         }
     } else{
         console.log("tamanho: ", array.length );
         for (var i = 0 ; i <= array.length-1; i++){
-            console.log("ponto da curva superior a 4: ", array[i] );
+            console.log("esse é um ponto de bezier: ", array[i] );
         }
     }
         
 }
-
 
 function bspline(l,i,j){
     var pontosDaCurva=[];
     var ultimo = (3*l);
     var penultimo = (3*l)-1; 
     var antePenultimo = (3*l)-2;
-    if( contador === 0){ //minifuncao para saber quantos do array antigo pontos guardar
-        guarde = 1; //a variavel guarde deve guardar o primeiro e segunda posição do array
-    }
     
     console.log(ultimo," ",penultimo," ",antePenultimo);
-    if ( fakePoints.length <= 4){
+    if ( points.length <= 4){
         pontosDaCurva.push(points[0]);
         pontosDaCurva.push(points[1]);
         pontosDaCurva.push(points[2]);
         pontosDaCurva.push(points[3]);
-        contador= 0 ; //até aqui ta ok!
-        
     }
     else{
-        for ( var m = 0 ; m <= guarde ; m++){ //guardando os primeiros 2 pontos
+        for ( var m = 0 ; m <= 1 ; m++){ // guardando os primeiros 2 pontos
             pontosDaCurva.push(copy[m]);
         }  
         
@@ -66,7 +63,7 @@ function bspline(l,i,j){
         if (qntPontos > 5){
             for (var k = 2 ; k <= i ; k++ ){ // calculo de todos pontos extremos novamente
                 pontosDaCurva[(3*k)-2] = pontoExtremoDir(k);
-                pontosDaCurva[(3*k)-1] = pontoExtremoEsq(k);    
+                pontosDaCurva[(3*k)-1] = pontoExtremoEsq(k);  
             }        
         }
         
@@ -114,18 +111,21 @@ function juncaoEstatico(i,pontosDaCurva,antePenultimo){
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
+
 function juncaoEsqEstatico(i,pontosDaCurva){
     var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[2].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
+
 function juncaoDirEstatico(i,pontosDaCurva,antePenultimo){
      var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].y ) + (ladoDireito(i,i-1)* pontosDaCurva[antePenultimo].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
+
 function juncaoNoEstatico(i,pontosDaCurva){
      var corX = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].x ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].x ) ) ; 
     var corY = ( (ladoEsquerdo(i,i-1) * pontosDaCurva[(3*i)-1].y ) + (ladoDireito(i,i-1)* pontosDaCurva[(3*i)+1].y ) ) ; 
@@ -133,17 +133,18 @@ function juncaoNoEstatico(i,pontosDaCurva){
     return ponto;
     
 }
+
 // ----- calculando pontos extremos esquerdos e direitos
 function pontoExtremoEsq(i){
-    var corX = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].x ) + (direitoExtremoEsq(i,i-1)* points[i].x ) ) ; 
-    var corY = ( (esquerdoExtremoEsq(i,i-1) * points[i-1].y ) + (direitoExtremoEsq(i,i-1)* points[i].y ) ) ; 
+    var corX = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].x ) + (direitoExtremoEsq(i)* points[i+1].x ) ) ; 
+    var corY = ( (esquerdoExtremoEsq(i) * points[(i-1)+1].y ) + (direitoExtremoEsq(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
 
-function pontoExtremoDir(i){
-    var corX = ( (esquerdoExtremoDir(i,i-1) * points[i-1].x ) + (direitaExtremoDir(i,i-1)* points[i].x ) ) ; 
-    var corY = ( (esquerdoExtremoDir(i,i-1) * points[i-1].y ) + (direitaExtremoDir(i,i-1)* points[i].y ) ) ; 
+function pontoExtremoDir(i){ //3*i-2
+    var corX = ( (esquerdaExtremoDir(i) * points[(i-1)+1].x ) + (direitaExtremoDir(i)* points[i+1].x ) ) ; 
+    var corY = ( (esquerdaExtremoDir(i) * points[(i-1)+1].y ) + (direitaExtremoDir(i)* points[i+1].y ) ) ; 
     var ponto = {x:corX, y:corY}; 
     return ponto;
 }
@@ -157,7 +158,6 @@ function antepenultimo(l){
 }
   
 
-
 // FUNCOES AUXILIARES PARA CALCULO DOS PONTOS BSPLINE
 function ladoEsquerdo(valor1,valor0){
     var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1])/ ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)+1],valoresU[valor1])));
@@ -169,23 +169,23 @@ function ladoDireito(valor1,valor0){
     return resposta;
 }
 
-function esquerdoExtremoEsq(valor1,valor0){
-    var resposta = (delta(valoresU[(valor1)],valoresU[(valor0)]) + delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function esquerdoExtremoEsq(i){ //3k-1
+    var resposta = ((delta(valoresU[i+1],valoresU[i])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i]))  );
     return resposta;
 }
 
-function direitoExtremoEsq(valor1,valor0){
-    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function direitoExtremoEsq(i){ //3k-1
+    var resposta = ( ((delta(valoresU[i],valoresU[i-1])) + delta(valoresU[i-1],valoresU[i-2])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])));
     return resposta;
 }
 
-function esquerdoExtremoDir(valor1,valor0){
-    var resposta = (delta(valoresU[(valor1)+1],valoresU[valor1]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function esquerdaExtremoDir(i){ //3k-2
+    var resposta = ((delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i]) ));
     return resposta;
 }
 
-function direitaExtremoDir(valor1,valor0){
-    var resposta = (delta(valoresU[(valor0)],valoresU[(valor0)-1]) + delta(valoresU[(valor1)],valoresU[(valor0)]) / ( delta(valoresU[valor1],valoresU[valor0]) + delta(valoresU[(valor1)],valoresU[valor0]) + delta(valoresU[(valor0)],valoresU[(valor0)-1]) ));
+function direitaExtremoDir(i){ //3k-2
+    var resposta = ((delta(valoresU[i-1],valoresU[i-2])) / ( delta(valoresU[i-1],valoresU[i-2]) + delta(valoresU[i],valoresU[i-1]) + delta(valoresU[i+1],valoresU[i])));
     return resposta;
 }
 
@@ -194,23 +194,38 @@ function delta(u1,u0){
     return resposta;
 }
 
+// AUXILIAR
+function incrementValoresU() {
+    // TEM QUE CALCULAR O u E ATUALIZAR NA LISTA
+    if (defaultU === 0) {
+        valoresU.push(defaultU);
+        defaultU = 10;
+    } else {
+        defaultU = valoresU[valoresU.length-1] + 10 ;
+        valoresU.push(defaultU);
+    }
+}
 
 
+// CASTEJAU -----------------------------------
 
-// CASTEJAU-----------------------------------
-
-function makeCurva(){
+function makeCurva(bspline){
     var pointsCurve = [];
+    console.log("Atualizando...");
     for (t = 0 ; t <= 1 ; t = t + parametro){
-        var pontosCastel = points.slice(0, qntPontos+1);
-        deCasterjao(pontosCastel)
+        var pontosCastel = [];
+        for (var e = 0 ; e < bspline.length ; e++){
+            pontosCastel.push({x: bspline[e].x , y:bspline[e].y });
+        }
+        deCasterjao(pontosCastel,t); // o mito!
         pointsCurve.push(pontosCastel[0]);
     }   
     drawCurve(pointsCurve);
 }
-function deCasterjao(pontosCastel){   
-    for(n = 1; n < qntPontos ; n++) {
-      for(p = 0; p < qntPontos - n; p++) {
+
+function deCasterjao(pontosCastel,t){   
+    for(n = 1; n < pontosCastel.length ; n++) {
+      for(p = 0; p < pontosCastel.length - n; p++) {
         var cordX = (1 - t) * pontosCastel[p].x + t * pontosCastel[p+1].x;
         var cordY = (1 - t) * pontosCastel[p].y + t * pontosCastel[p+1].y;
         pontosCastel[p] = {x: cordX, y: cordY};
@@ -219,7 +234,7 @@ function deCasterjao(pontosCastel){
 }
 
 function drawCurve(pointsCurve) {
-  if(qntPontos > 3) {
+  if(qntPontos >= 3) {
     for(var i in pointsCurve) {
       ctx.beginPath();
       
@@ -238,20 +253,78 @@ function drawCurve(pointsCurve) {
 
 
 
-
-
-// FUNCOES BASICAS DE CANVAS-----------------
-function clearCanvas()
-{
-  var canvas = document.getElementById('canvas'),
-      ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  points.splice(0,points.length);
-  p
-  drawCircles();
+// FUNCOES BASICAS DE CANVAS -----------------
+function addInput(pointNumber, pointValue){
+    var rowInputs = $("#u-inputs");
+    
+    var div = $("<div/>")
+        .attr("id", pointNumber)
+        .attr("style", "margin-left:10px;margin-right:10px; width:55px;")
+        .attr("class", "input-field col l3 s3 m");
+    
+    var input = $("<input/>")
+        .attr("id", pointNumber)
+        .attr("value", pointValue)
+        .attr("class", "active")
+        .attr("type", "number")
+    
+    var label = $("<label/>")
+        .attr("for", pointNumber)
+        .attr("class", "active")
+        .text("Ponto "+pointNumber);
+    
+    div.append(input);
+    div.append(label);
+    
+    rowInputs.append(div);
 }
 
-function resizeCanvas() {
+function clearInputs() {
+    $( "#u-inputs" ).empty();
+}
+
+$("#u-update-button").on("click", updateValuesU);
+
+function updateValuesU() {
+    var uInputs = $("#u-inputs input");
+    for (var i = 0 ; i < uInputs.length ; i++) {
+        valoresU[i] = parseInt(uInputs[i].value);
+    }
+}
+
+function clearCanvas() {
+  var canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    var l = 0; //segmento
+    i= 2;
+    j= 1;
+    
+    points = []; // pontos d adicionados ao clique
+    qntPontos = 0;
+    grau = qntPontos - 1;
+    precisao = 2000, parametro = 1 / precisao;
+
+    //BSPLINE ARRAY
+    l = 0; //segmento
+    i= 2;
+    j= 1;
+    pontosBspline=[0,1]; // pontos do bspline até 4 pontos
+    copy=[]; //array com as copias dos pontos do array antes de um click.
+
+    defaultU = 0;
+    valoresU = [];
+
+    fakePoints =[]; // pontos d adicionados ao clique ---> fake em forma de algorismo
+    qntCurvas = 1;
+
+    fechada = false;
+    
+    clearInputs();
+}
+
+function initCanvasSize() {
   canvas.width = parseFloat(window.getComputedStyle(canvas).width);
   canvas.height = parseFloat(window.getComputedStyle(canvas).height);
 }
@@ -273,85 +346,105 @@ function drawCircles() {
         ctx.stroke();
     }
   }
-  if(qntPontos > 3) {
-    makeCurva();
-  }
 }
 
-function dist(p1, p2) {
-  var v = {x: p1.x - p2.x, y: p1.y - p2.y};
-  return Math.sqrt(v.x * v.x + v.y * v.y);
-}
+function drawBsplines() {
+  for (var i in pontosBspline) {
+    ctx.beginPath();
+    ctx.arc(pontosBspline[i].x, pontosBspline[i].y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = '#64B5F6';
+    ctx.fill();
 
-function getIndex(click) {
-  for (var i in points) {
-    if (dist(points[i], click) <= 10) {
-      return i;
+    if(i>0){
+        var posX= pontosBspline[i-1].x;
+        var posY= pontosBspline[i-1].y;
+        ctx.moveTo(posX,posY);
+        ctx.lineTo(pontosBspline[i].x,pontosBspline[i].y);
+        ctx.strokeStyle= '#64B5F6';
+        ctx.lineWidth=3;
+        ctx.stroke();
     }
   }
-  return -1;
+    
+  for(var w = 0 ; w < qntCurvas ; w++){
+      //pontosBspline  4-4
+        var inferior = w*3; 
+        var superior = inferior+3;
+        var array=[];
+
+        for (var e = inferior ; e <= superior ; e++){
+            array.push({x: pontosBspline[e].x , y:pontosBspline[e].y });
+        }
+        
+      if(qntPontos >= 3)    {
+            makeCurva(array);
+        }  
+  }
+  
+
 }
 
+function verdade(){
+    fechada=true;
+}
 
+function falso(){
+    fechada=false;
+    drawBsplines();
+}
 
-
-resizeCanvas();
+function criarCurva(){
+    
+}
+initCanvasSize();
 
 
 
 // ACOES NO MOUSE-----------------
-
-
 canvas.addEventListener('mousedown', e => {
-  var click = {x: e.offsetX, y: e.offsetY, v:{x: 0, y:0}};
-  index = getIndex(click);
-  if (index === -1) {
-    qntPontos++;
-    fakePoints.push(qntPontos); //adicionando no points fake 
+    var click = {x: e.offsetX, y: e.offsetY, v:{x: 0, y:0}};
+
     points.push(click); //adicionando no points
+    qntPontos = points.length;
+
+    incrementValoresU();
+    addInput(qntPontos-1, valoresU[qntPontos-1]);
+
+    //fakePoints.push(qntPontos); //adicionando no points fake 
     l = qntPontos - 3;   //alterando valor de l -- segmentos utilizado por vezes no bspline
     var pontosDaCurva = bspline(l,i,j); //rodando o bspline
-    if ( qntPontos >4 ){
-        pontosDaCurva.push(click); //adicionando o ponto no final
+    if (qntPontos > 4){
+        if(fechada===false){
+            pontosDaCurva.push(click);
+        }else {
+            pontosDaCurva.push(points[0]);
+        } //adicionando o ponto no final
+        qntCurvas++;
     }
-    if( qntPontos > 4){
+    if(qntPontos > 4){
         i = i + 1;
         j = j + 1;
     }
-    imprimir(pontosDaCurva);
-    
-    copy = pontosDaCurva.slice(0,pontosDaCurva.length+1);  //O COPY TA FUNCIONANDO 
-    console.log( "valor de i: ",i, "valor de j: ", j);
-    console.log("segmento: ", l);
-    drawCircles(); //traçando a bspline
-    
     //imprimir(pontosDaCurva);
-  } else {
-    move = true;
-  }
-});
 
+    pontosBspline.splice(0,pontosBspline.length);
+    pontosBspline = pontosDaCurva.slice(0, pontosDaCurva.length);
+
+    copy = pontosDaCurva.slice(0,pontosDaCurva.length+1);  //O COPY TA FUNCIONANDO 
+    //console.log( "valor de i: ",i, "valor de j: ", j);
+    //console.log("segmento: ", l);
+    //console.log("quantidade de pontos: ", qntPontos,"quantidade de curvas : ",qntCurvas );
+});
 
 canvas.addEventListener('mouseup', e => {
   move = false;
 });
 
-
-
-
-canvas.addEventListener('mousemove', e => {
-  if (move) {
-    var old = points[index];
-    points[index] = {x: e.offsetX, y: e.offsetY, v: {x: 0, y: 0}};
-    points[index].v = {x: e.offsetX - old.x, y: e.offsetY - old.y};
-    drawCircles();
-  }
-});
-
 setInterval(() => {
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawCircles();
-
-
-}, 500 / 30);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (qntPontos>=3){
+        drawBsplines();
+    }
+    drawCircles();
+  
+}, 500);

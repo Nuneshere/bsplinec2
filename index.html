@@ -3,37 +3,74 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bspline C2 cubica v2</title>
+    <title >Bspline C2 cubica v2</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 
 
 
   </head>
-  <body style="background-color:#CFD8DC; padding-left:0px; padding-right:0px" >
+  <body style="background-color:#FEFEFE; padding-left:0px; padding-right:0px" >
     <div>
       <h1>
-        <strong >B-Spline Cúbica C2 :) </strong> 
+        <strong style="margin-left:20px;color:#263238;">B-Spline Cúbica C2 Aberta e Fechada :) </strong> 
       </h1>
-      <canvas style="height: 450px; width: 1400px;" id="canvas" ></canvas>
-      <br><br>
-      <div class="row">
-        <button  class="col" style="border-radius:40px; margin-left:10px; margin-top:10px;">CRIAR CURVA</button>
-        <br>
-        <br>
-
-        <button class="col"  onclick="clearCanvas()" style="border-radius:40px; margin-left:60px; margin-top:10px;">DELETAR</button>
-      </div>
+      <canvas style="height: 450px; width: 1400px; margin-top:10px; " id="canvas" ></canvas>
       <br>
+      <h4 style="margin-left:20px; margin-top:20px; margin-bottom:20px;">As mudanças terão efeito no próximo clique. </h4>
+      <div class="row">
+        
+        <a class="waves-effect waves-light btn" onclick="clearCanvas()" style="border-radius:40px; margin-left:40px; margin-top:10px;padding-left:10px;background-color:#2196F3; color:#fff; text-weight:600;">DELETAR TODOS BOTÕES</a>
+      
+       <form style="padding-left:40px; margin-top:5px" action="#">
+        
+        <p>
+          <input class="with-gap" onclick="falso()" name="group1" type="radio" id="test1" checked />
+          <label for="test1"  >Aberta</label>
+        </p>
+        <p>
+          <input class="with-gap" onclick="verdade()" name="group1" type="radio" id="test2" />
+          <label for="test2">Fechada</label>
+        </p>
+    
+      </form>  
+      
+      
+      </div>
+      
+    <div style="margin:0px;" class="container">
+        <div class="row">
+        
+           <div style="padding-bottom:10px;" class="col s10 m10 l10">
+                <h5 style="margin-bottom:20px;">Valores do parâmetro u: </h5>
+                <a id="u-update-button" style="color: white; text-weight:600; border-radius:40px;background-color:#607D8B;" class="waves-effect waves-light btn">atualizar VALORES</a>
+            </div>
+        </div>
+        <div id="u-inputs" class="row"> 
 
+        </div>
+    </div>
+      
+      
+      <br>
+      <div class="row">
+        <div id="slider">
+        </div>
+      </div>
       <p class="center">
-        Made by <strong>Mateus Nunes</strong> with the web!
+        Made by <strong>Mateus Nunes</strong>, coded in brackets.
       </p>
     </div>
   </body>
 
   <script src="script.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js">
+  </script>
+
 
 </html>

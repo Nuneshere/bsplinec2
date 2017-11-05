@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather:400,700');
 
 html,body  {
-  background-color: #CFD8DC ;
+  background-color: #FEFEFE ;
   font-family: "Open Sans", sans-serif;
   padding: 5px 0px 0px 5px;
   font-size: 18px;
@@ -13,18 +13,23 @@ html,body  {
   height: 100%;
 }
 
-button{
-  background-color: #3F51B5;
-  color: white;
+/*button{
+  background-color: transparent;
+  color: #2196F3;
+    font-weight: 700;
   font-family: "Open Sans", sans-serif;
   font-size: 13px;
   border-radius: 20px;
   padding: 5px 10px 5px 10px;
   margin-top: 10px;
+  border-color: #2196F3;
+    border-width: thick;
+    border-top-width: thick;
 }
 button:hover{
-  background-color: #7986CB;
-}
+  color: white;
+  background-color: #2196F3;
+} */
 
 canvas{
   background-color: #455A64;
@@ -33,6 +38,7 @@ canvas{
   height: 100%;
   padding: 0;
   margin: 0;
+    margin-left:5px;
 }
 
 h1 {
