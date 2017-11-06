@@ -12,7 +12,7 @@ var points = []; // pontos d adicionados ao clique
 var index = -1;
 var qntPontos = 0;
 var grau = qntPontos - 1;
-var precisao = 2000, parametro = 1 / precisao; //precisao de bezier
+var precisao = 1000, parametro = 1 / precisao; //precisao de bezier
 
 // -------------- TODAS ESSAS VARIAVEIS SAO IMPORTANTES PARA BSPLINE C2 
 var l = 0; //segmento
@@ -30,6 +30,11 @@ var qntCurvas=1; //quantidade de curvas no nosso bspline
 
 var fechada = false; // se a curva deve ou não ser fechada
 
+$('#precisao').on('change',function(event){
+   precisao = parseInt(event.target.value);
+   parametro= 1/precisao;
+   drawBsplines(); 
+})
 
 
 function imprimir(array){ 
@@ -323,7 +328,7 @@ function clearCanvas() {
     points = []; // pontos d adicionados ao clique
     qntPontos = 0;
     grau = qntPontos - 1;
-    precisao = 2000, parametro = 1 / precisao;
+    precisao = 1000, parametro = 1 / precisao;
 
     //BSPLINE ARRAY
     l = 0; //segmento
@@ -404,7 +409,7 @@ function drawBsplines() {
     }
   }
     
-  for(var w = 0 ; w < qntCurvas ; w++){
+  for(var w = 0 ; w < qntCurvas ; w++){ 
       //pontosBspline  4-4
         var inferior = w*3; 
         var superior = inferior+3;
@@ -510,6 +515,8 @@ canvas.addEventListener('mousedown', e => {
 canvas.addEventListener('mouseup', e => {
   move = false;
 });
+
+
 
 setInterval(() => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
