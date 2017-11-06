@@ -358,7 +358,7 @@ function drawCircles() {
   for (var i in points) {
     ctx.beginPath();
     ctx.arc(points[i].x, points[i].y, 6, 0, 2 * Math.PI);
-    if(comD ===true){
+    if(comCurva2 ===true){
         ctx.fillStyle = '#CFD8DC';
     }else{
          ctx.fillStyle = 'transparent';
@@ -382,7 +382,6 @@ function drawCircles() {
     }
   }
 }
-
 function drawBsplines() {
   for (var i in pontosBspline) {
     ctx.beginPath();
@@ -438,6 +437,8 @@ function falso(){
 var comD=true;
 var comSpline =true;
 var comCurva =true;
+var comCurva2 =true;
+
 function comPontochange(){
     if (comD===true){
         comD = false;
@@ -461,6 +462,14 @@ function comCurvachange(){
         comCurva = false;
     }else if ( comCurva ===false){
         comCurva = true;
+    } 
+}
+
+function comCurvachange2(){
+    if (comCurva2===true){
+        comCurva2 = false;
+    }else if ( comCurva2 ===false){
+        comCurva2 = true;
     } 
 }
 initCanvasSize();
